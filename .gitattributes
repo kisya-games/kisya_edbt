@@ -1,0 +1,4 @@
+* text=auto
+
+Cargo.lock -diff
+flake.lock -diff

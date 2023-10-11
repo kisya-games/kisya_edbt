@@ -1,0 +1,85 @@
+[package]
+name        = "kisya_edbt"
+description = "Event-Driven Behaviour Tree for Bevy"
+version     = "0.1.0-dev"
+authors     = ["Kisya Games"]
+edition     = "2024"
+license     = "MIT OR Apache-2.0"
+
+[features]
+default = ["random"]
+egui    = ["dep:bevy-inspector-egui", "dep:bevy_egui", "dep:egui-phosphor"]
+random  = ["dep:rand"]
+
+[dependencies]
+bevy = { version = "0.19.1", default-features = false, features = [
+  "bevy_asset",
+  "bevy_log",
+] }
+bevy-inspector-egui = { version = "0.37", default-features = false, optional = true }
+bevy_egui = { version = "0.42", default-features = false, optional = true, features = [
+  "manage_clipboard",
+  "open_url",
+  "render",
+] }
+egui-phosphor = { version = "0.13.0", default-features = false, optional = true, features = [
+  "regular",
+] }
+
+anyhow    = { version = "1.0.104", default-features = false }
+indextree = { version = "4.8.1", default-features = false }
+itertools = { version = "0.14.0", default-features = false }
+rand      = { version = "=0.8.3", default-features = false, optional = true, features = ["std", "std_rng"] }
+ron       = { version = "0.11", default-features = false }
+serde     = { version = "1", default-features = false }
+smallvec  = { version = "1.15.2", default-features = false }
+strum     = { version = "0.28.0", default-features = false, features = ["derive"] }
+thiserror = { version = "2.0.20", default-features = false }
+
+[dev-dependencies]
+criterion = { version = "0.7", default-features = false, features = [
+  "cargo_bench_support",
+  "html_reports",
+  "plotters",
+] }
+bevy_egui = { version = "0.42", default-features = false, features = [
+  "manage_clipboard",
+  "open_url",
+  "render",
+] }
+bevy-inspector-egui = { version = "0.37", default-features = false }
+egui-phosphor = { version = "0.13.0", default-features = false, features = [
+  "regular",
+] }
+bevy = { version = "0.19.1", default-features = false, features = [
+  "2d",
+  "bevy_feathers",
+  "std",
+  "ui",
+] }
+
+[[bench]]
+name    = "runner_scaling"
+harness = false
+
+[[example]]
+name              = "purrtle"
+required-features = ["egui"]
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev.package.wgpu-types]
+debug-assertions = false
+
+[profile.release]
+codegen-units = 1
+
+[patch.crates-io]
+# https://github.com/amPerl/egui-phosphor/pull/44
+egui-phosphor = { git = "https://github.com/UnknownSuperficialNight/egui-phosphor", branch = "main" }
+# https://github.com/jakobhellermann/bevy-inspector-egui/pull/323
+"bevy-inspector-egui" = { git = "https://github.com/kisya-games/bevy-inspector-egui", branch = "egui-0.36" }

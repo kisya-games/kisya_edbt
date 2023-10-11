@@ -1,0 +1,5 @@
+[toolchain]
+channel = "nightly"
+components = ["rust-src", "rustfmt", "rustc-dev"]
+targets = ["x86_64-pc-windows-gnu"]
+profile = "default"

@@ -17,6 +17,8 @@ bevy = { version = "0.19.1", default-features = false, features = [
   "bevy_log",
 ] }
 bevy-inspector-egui = { version = "0.37", default-features = false, optional = true }
+
+# egui
 bevy_egui = { version = "0.42", default-features = false, optional = true, features = [
   "manage_clipboard",
   "open_url",
@@ -41,15 +43,6 @@ criterion = { version = "0.7", default-features = false, features = [
   "cargo_bench_support",
   "html_reports",
   "plotters",
-] }
-bevy_egui = { version = "0.42", default-features = false, features = [
-  "manage_clipboard",
-  "open_url",
-  "render",
-] }
-bevy-inspector-egui = { version = "0.37", default-features = false }
-egui-phosphor = { version = "0.13.0", default-features = false, features = [
-  "regular",
 ] }
 bevy = { version = "0.19.1", default-features = false, features = [
   "2d",

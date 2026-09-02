@@ -19,7 +19,7 @@ https://github.com/user-attachments/assets/426e94e4-9707-45c0-ae87-673f9652529c
 - **Composable Behaviour Trees**: Create BTs using a small DSL `behaviour_tree!` or just load them from disk as RON assets. Hot reloading and validation included!
 - **Common nodes library**: *LoopNode*, *ParallelNode*, *SequenceNode*, *ConditionNode*, *WaitNode* and more. Fully tested, too!
 - **Fully documented**: All public API is fully documented, enforced by `#![warn(missing_docs)]`.
-- **Builtin Egui editor**: You can edit any *BehaviourTree* within egui once you enable `features = ["egui"]`. See it in [**purrtle**](examples/purrtle.rs) example.
+- **Builtin Egui editor**: You can edit any *BehaviourTree* within egui once you enable `features = ["egui"]`. See it in the [**purrtle**](examples/purrtle.rs) example (`cargo run --example purrtle --features egui`).
 
 ### Planned features
 

@@ -8,8 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  # Keep the Bevy build under the runner's memory ceiling: no debuginfo, no
-  # dependency optimization, no incremental cache.
+  # Keep the Bevy build under the runner's memory ceiling.
   CARGO_PROFILE_DEV_OPT_LEVEL: 0
   CARGO_PROFILE_DEV_DEBUG: 0
   CARGO_INCREMENTAL: 0
@@ -21,6 +20,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install Bevy Linux dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev libwayland-dev
     - name: Build
       run: cargo build --verbose
     - name: Run tests

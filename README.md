@@ -19,7 +19,7 @@ https://github.com/user-attachments/assets/426e94e4-9707-45c0-ae87-673f9652529c
 - **Composable Behaviour Trees**: Create BTs using a small DSL `behaviour_tree!` or just load them from disk as RON assets. Hot reloading and validation included!
 - **Common nodes library**: *LoopNode*, *ParallelNode*, *SequenceNode*, *ConditionNode*, *WaitNode* and more. Fully tested, too!
 - **Fully documented**: All public API is fully documented, enforced by `#![warn(missing_docs)]`.
-- **Builtin Egui editor**: You can edit any *BehaviourTree* within egui once you enable `features = ["egui"]`. See it in [**purrtle**](examples/purrtle) example.
+- **Builtin Egui editor**: You can edit any *BehaviourTree* within egui once you enable `features = ["egui"]`. See it in [**purrtle**](examples/purrtle.rs) example.
 
 ### Planned features
 
@@ -110,7 +110,7 @@ fn move_node_system(
 
 ## Performance
 
-Per-actor cost and total update cost is measured in [**runner_scaling**](benches/runner_scaling) benchmark.
+Per-actor cost and total update cost is measured in [**runner_scaling**](benches/runner_scaling.rs) benchmark.
 It's probably not a very valid benchmark, because I have no idea what I'm doing. But still:
 
 | scenario | actors | total | per actor |

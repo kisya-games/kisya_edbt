@@ -69,9 +69,6 @@ required-features = ["egui"]
 [profile.dev]
 opt-level = 1
 
-[profile.dev.package."*"]
-opt-level = 3
-
 [profile.dev.package.wgpu-types]
 debug-assertions = false
 

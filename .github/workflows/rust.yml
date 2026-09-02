@@ -8,6 +8,11 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # Keep the Bevy build under the runner's memory ceiling: no debuginfo, no
+  # dependency optimization, no incremental cache.
+  CARGO_PROFILE_DEV_OPT_LEVEL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_INCREMENTAL: 0
 
 jobs:
   build:

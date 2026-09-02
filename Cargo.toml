@@ -1,10 +1,15 @@
 [package]
 name        = "kisya_edbt"
 description = "Event-Driven Behaviour Tree for Bevy"
-version     = "0.1.0-dev"
+version     = "0.1.0"
 authors     = ["Kisya Games"]
 edition     = "2024"
 license     = "MIT OR Apache-2.0"
+repository  = "https://github.com/kisya-games/kisya_edbt"
+readme      = "README.md"
+keywords    = ["ai", "behavior-tree", "behaviour-tree", "bevy", "gamedev"]
+categories  = ["game-development"]
+exclude     = [".github/"]
 
 [features]
 default = ["random"]
@@ -28,14 +33,19 @@ egui-phosphor = { version = "0.13.0", default-features = false, optional = true,
   "regular",
 ] }
 
-anyhow    = { version = "1.0.104", default-features = false }
+anyhow = { version = "1.0.104", default-features = false }
 indextree = { version = "4.8.1", default-features = false }
 itertools = { version = "0.14.0", default-features = false }
-rand      = { version = "=0.8.3", default-features = false, optional = true, features = ["std", "std_rng"] }
-ron       = { version = "0.11", default-features = false }
-serde     = { version = "1", default-features = false }
-smallvec  = { version = "1.15.2", default-features = false, features = ["const_new"] }
-strum     = { version = "0.28.0", default-features = false, features = ["derive"] }
+rand = { version = "=0.8.3", default-features = false, optional = true, features = [
+  "std",
+  "std_rng",
+] }
+ron = { version = "0.11", default-features = false }
+serde = { version = "1", default-features = false }
+smallvec = { version = "1.15.2", default-features = false, features = [
+  "const_new",
+] }
+strum = { version = "0.28.0", default-features = false, features = ["derive"] }
 thiserror = { version = "2.0.20", default-features = false }
 
 [dev-dependencies]

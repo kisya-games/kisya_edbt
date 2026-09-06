@@ -4,6 +4,11 @@
 
 # Kisya EDBT
 
+[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/kisya-games/kisya_edbt?tab=readme-ov-file#license)
+[![Crates.io](https://img.shields.io/crates/v/kisya_edbt.svg)](https://crates.io/crates/kisya_edbt)
+[![Docs](https://docs.rs/kisya_edbt/badge.svg)](https://docs.rs/kisya_edbt/)
+[![CI](https://github.com/kisya-games/kisya_edbt/actions/workflows/rust.yml/badge.svg?branch=main&event=push)](https://github.com/kisya-games/kisya_edbt/actions/workflows/rust.yml)
+
 🌳 **Event-Driven Behaviour Trees for [Bevy](https://bevyengine.org/) game engine** 🕊️
 
 </div>

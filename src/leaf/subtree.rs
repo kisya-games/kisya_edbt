@@ -6,7 +6,7 @@ use crate::{
     core::{
         node::{BehaviourNode, LeafNodeInfo, NodeRef, TreeNodeId},
         registrar::BehaviourNodeRegistrarAppExt,
-        task::{ChildTaskFinished, TaskStatus, TaskWorker},
+        task::{ChildTaskFinished, TaskAdded, TaskStatus, TaskWorker},
         tree::BehaviourTree,
     },
     prelude::SpawnTaskExt,
@@ -67,7 +67,7 @@ impl BehaviourNode for SubtreeNode {
 }
 
 fn on_subtree_setup_hook(
-    event: On<Add, TaskWorker<SubtreeNode>>,
+    event: On<TaskAdded, TaskWorker<SubtreeNode>>,
     mut cmd: Commands,
     trees: Res<Assets<BehaviourTree>>,
     asset_server: Res<AssetServer>,

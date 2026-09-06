@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `TaskAdded` type-alias for `Insert` event entity (used to be just `Add`). Used for
+  setup hooks.
+
 ### Changed
 - `BehaviourRunnerCycles` now tracks spawned task entities and check them upon deciding
   whether or not to rerun a new cycle. This results in a 10-40% speedup all across the benchmark.

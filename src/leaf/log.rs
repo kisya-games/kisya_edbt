@@ -7,7 +7,7 @@ use bevy::prelude::*;
 use crate::core::{
     node::{BehaviourNode, LeafNodeInfo, NodeRef},
     registrar::BehaviourNodeRegistrarAppExt,
-    task::{TaskStatus, TaskWorker},
+    task::{TaskAdded, TaskStatus, TaskWorker},
 };
 
 /// Plugin for [`LogNode`].
@@ -81,7 +81,7 @@ impl BehaviourNode for LogNode {
 }
 
 fn on_log_setup_hook(
-    event: On<Add, TaskWorker<LogNode>>,
+    event: On<TaskAdded, TaskWorker<LogNode>>,
     mut cmd: Commands,
     q_task: Query<NodeRef<LogNode>>,
 ) {

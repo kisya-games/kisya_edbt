@@ -203,17 +203,24 @@ fn spawn_task<N: BehaviourNode>(
     };
     let worker_id = world.register_component::<TaskWorker<N>>();
 
-    // `TaskOf`/`TaskChildOf` go in first to trigger their hooks.
-    let mut task_mut = world.get_entity_mut(task_entity)?;
-    task_mut.insert(TaskOf(actor));
-    if let Some(source) = parent {
-        task_mut.insert(TaskChildOf(source));
-    }
-    task_mut.insert((
+    // One bundle insert costs one archetype move. Safe to combine with the
+    // relationships because setup observers run on [`TaskAdded`] (`Insert`),
+    // which fires after the `TaskOf`/`TaskChildOf` `on_insert` hooks have
+    // queued their relationship updates.
+    let bundle = (
         Name::new(N::short_type_path()),
         TaskInfo { source: tree_node_id, worker_id },
         TaskWorker::<N>::new(task),
-    ));
+    );
+    let mut task_mut = world.get_entity_mut(task_entity)?;
+    match parent {
+        Some(source) => {
+            task_mut.insert((TaskOf(actor), TaskChildOf(source), bundle));
+        },
+        None => {
+            task_mut.insert((TaskOf(actor), bundle));
+        },
+    }
 
     if let Some(parent) = parent
         && let Ok(mut parent_mut) = world.get_entity_mut(parent)

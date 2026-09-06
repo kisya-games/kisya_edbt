@@ -7,7 +7,7 @@ use crate::core::{
     query::TaskRef,
     registrar::BehaviourNodeRegistrarAppExt,
     spawn::SpawnTaskExt,
-    task::{ChildTaskFinished, TaskStatus, TaskWorker},
+    task::{ChildTaskFinished, TaskAdded, TaskStatus, TaskWorker},
 };
 
 /// Plugin for [`NotNode`] and `NotTask`.
@@ -34,7 +34,7 @@ impl BehaviourNode for NotNode {
 }
 
 fn on_not_setup_hook(
-    event: On<Add, TaskWorker<NotNode>>,
+    event: On<TaskAdded, TaskWorker<NotNode>>,
     mut cmd: Commands,
     q_task: Query<(TaskRef<NotNode>, NodeRef<NotNode>)>,
 ) {

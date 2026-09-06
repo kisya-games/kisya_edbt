@@ -144,7 +144,7 @@ impl Plugin for ProbeNodePlugin {
 }
 
 fn on_probe_setup_hook(
-    event: On<Add, TaskWorker<ProbeNode>>,
+    event: On<TaskAdded, TaskWorker<ProbeNode>>,
     mut commands: Commands,
     mut log: ResMut<Lifecycle>,
     mut query: Query<(&mut TaskWorker<ProbeNode>, NodeRef<ProbeNode>)>,

@@ -88,7 +88,7 @@
 //! ### Behaviour systems and observers
 //!
 //! A node's task can be split in the following general phases:
-//! - **Setup**: an `On<Add, TaskWorker<N>>` observer, run once when the task
+//! - **Setup**: an `On<TaskAdded, TaskWorker<N>>` observer, run once when the task
 //!   spawns;
 //! - **Update**: a system run every frame while the task is running, usually
 //!   with [`TaskMut<N>`](crate::core::query::TaskMut) /
@@ -238,7 +238,8 @@ pub mod prelude {
             ser::{BehaviourTreeDeserializer, BehaviourTreeSerializer},
             spawn::SpawnTaskExt,
             task::{
-                ChildTaskFinished, ChildTaskSpawned, TaskFinished, TaskPool, TaskStatus, TaskWorker,
+                ChildTaskFinished, ChildTaskSpawned, TaskAdded, TaskFinished, TaskPool, TaskStatus,
+                TaskWorker,
             },
             tree::BehaviourTree,
         },

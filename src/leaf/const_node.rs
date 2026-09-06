@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::core::{
     node::{BehaviourNode, LeafNodeInfo, NodeRef},
     registrar::BehaviourNodeRegistrarAppExt,
-    task::{TaskStatus, TaskWorker},
+    task::{TaskAdded, TaskStatus, TaskWorker},
 };
 
 /// Plugin for [`ConstNode`].
@@ -44,7 +44,7 @@ impl BehaviourNode for ConstNode {
 }
 
 fn on_const_setup_hook(
-    event: On<Add, TaskWorker<ConstNode>>,
+    event: On<TaskAdded, TaskWorker<ConstNode>>,
     mut cmd: Commands,
     q_task: Query<NodeRef<ConstNode>>,
 ) {

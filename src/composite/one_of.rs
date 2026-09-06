@@ -7,7 +7,7 @@ use crate::core::{
     node::{BehaviourNode, CompositeNodeInfo, NodeRef},
     registrar::BehaviourNodeRegistrarAppExt,
     spawn::SpawnTaskExt,
-    task::{ChildTaskFinished, TaskStatus, TaskWorker},
+    task::{ChildTaskFinished, TaskAdded, TaskStatus, TaskWorker},
 };
 
 /// Plugin for [`OneOfNode`].
@@ -60,7 +60,7 @@ impl OneOfNode {
 }
 
 fn on_one_of_setup_hook(
-    event: On<Add, TaskWorker<OneOfNode>>,
+    event: On<TaskAdded, TaskWorker<OneOfNode>>,
     mut cmd: Commands,
     q_task: Query<NodeRef<OneOfNode>>,
 ) {

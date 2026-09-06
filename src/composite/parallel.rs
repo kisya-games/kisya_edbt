@@ -7,7 +7,7 @@ use crate::core::{
     query::TaskMut,
     registrar::BehaviourNodeRegistrarAppExt,
     spawn::SpawnTaskExt,
-    task::{ChildTaskFinished, ChildTaskSpawned, TaskStatus, TaskWorker},
+    task::{ChildTaskFinished, ChildTaskSpawned, TaskAdded, TaskStatus, TaskWorker},
 };
 
 /// Plugin for [`ParallelNode`] and [`ParallelTask`].
@@ -151,7 +151,7 @@ pub struct ParallelTask {
 }
 
 fn on_parallel_setup_hook(
-    event: On<Add, TaskWorker<ParallelNode>>,
+    event: On<TaskAdded, TaskWorker<ParallelNode>>,
     mut cmd: Commands,
     mut q_task: Query<(TaskMut<ParallelNode>, NodeRef<ParallelNode>)>,
 ) {

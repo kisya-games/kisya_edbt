@@ -9,7 +9,7 @@ use crate::core::{
     query::TaskMut,
     registrar::BehaviourNodeRegistrarAppExt,
     spawn::SpawnTaskExt,
-    task::{ChildTaskFinished, TaskStatus, TaskWorker},
+    task::{ChildTaskFinished, TaskAdded, TaskStatus, TaskWorker},
     tree::BehaviourTree,
 };
 
@@ -94,7 +94,7 @@ pub struct ConditionTask {
 }
 
 fn on_condition_setup_hook(
-    event: On<Add, TaskWorker<ConditionNode>>,
+    event: On<TaskAdded, TaskWorker<ConditionNode>>,
     mut cmd: Commands,
     q_task: Query<NodeRef<ConditionNode>>,
 ) {

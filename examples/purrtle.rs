@@ -303,7 +303,7 @@ fn rotate_node_system(
 }
 
 fn on_pen_setup_hook(
-    event: On<Add, TaskWorker<PenNode>>,
+    event: On<TaskAdded, TaskWorker<PenNode>>,
     mut cmd: Commands,
     q_task: Query<(TaskRef<PenNode>, NodeRef<PenNode>)>,
     mut q_turtle: Query<&mut Turtle>,

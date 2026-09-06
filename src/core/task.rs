@@ -15,6 +15,20 @@ use crate::core::{
     tree::ReflectDynamicNode,
 };
 
+/// Entity event for a new [`TaskWorker`] spawn.
+///
+/// Observers can be gated by the source node type exactly like lifecycle events
+/// are gated by a component: `On<TaskAdded, TaskWorker<WhileNode>>`
+/// only runs when the source task belongs to a `WhileNode`.
+///
+/// *NOTE*: Internally, this is just [`Insert`]. It is not [`Add`] on purpose:
+/// `Insert` observers fire after `on_insert` hooks, so the
+/// `TaskOf`/`TaskChildOf` relationship updates are already queued before a
+/// setup observer can queue a finish status. That keeps command order correct
+/// even when the whole task bundle is inserted in one go and the task finishes
+/// instantly.
+pub type TaskAdded = Insert;
+
 /// Plugin for general task logic.
 pub struct TaskPlugin;
 

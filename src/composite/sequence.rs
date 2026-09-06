@@ -7,7 +7,7 @@ use crate::core::{
     query::{TaskMut, TaskRef},
     registrar::BehaviourNodeRegistrarAppExt,
     spawn::SpawnTaskExt,
-    task::{ChildTaskFinished, TaskStatus, TaskWorker},
+    task::{ChildTaskFinished, TaskAdded, TaskStatus, TaskWorker},
 };
 
 /// Plugin for [`SequenceNode`] and [`SequenceTask`].
@@ -49,7 +49,7 @@ pub struct SequenceTask {
 }
 
 fn on_sequence_setup_hook(
-    event: On<Add, TaskWorker<SequenceNode>>,
+    event: On<TaskAdded, TaskWorker<SequenceNode>>,
     mut cmd: Commands,
     q_task: Query<(TaskRef<SequenceNode>, NodeRef<SequenceNode>)>,
 ) {

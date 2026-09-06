@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 
 use bevy::{
     ecs::{
-        lifecycle::Add,
         schedule::ScheduleConfigs,
         system::{IntoObserverSystem, ScheduleSystem},
     },
@@ -16,7 +15,7 @@ use super::BehaviourTreeNodeLibrary;
 use crate::core::{
     node::BehaviourNode,
     runner::{BehaviourUpdateCycleSchedule, BehaviourUpdateCycleSystems},
-    task::{ChildTaskFinished, ChildTaskSpawned, TaskFinished, TaskWorker, TaskWorkerPlugin},
+    task::{ChildTaskFinished, ChildTaskSpawned, TaskAdded, TaskFinished, TaskWorker, TaskWorkerPlugin},
 };
 
 /// Utility registrar to create new [`BehaviourNodes`][BehaviourNode] safely.
@@ -54,11 +53,11 @@ where
 
     /// Adds a new setup observer to this node, run once when its task spawns.
     ///
-    /// The observer must be typed as `On<Add, TaskWorker<N>>`.
+    /// The observer must be typed as `On<TaskAdded, TaskWorker<N>>`.
     #[must_use = "Register this node using `register()`"]
     pub fn with_setup_observer<M>(
         mut self,
-        observer: impl IntoObserverSystem<Add, TaskWorker<N>, M>,
+        observer: impl IntoObserverSystem<TaskAdded, TaskWorker<N>, M>,
     ) -> Self {
         self.observers.push(Box::new(move |app| {
             app.add_observer(observer);

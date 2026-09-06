@@ -9,7 +9,7 @@ use crate::core::{
     Behaviour, DisabledBehaviour,
     node::TreeNodeId,
     spawn::SpawnTask,
-    task::{DisabledTask, TaskPool},
+    task::{DisabledTask, SleepingTask, TaskPool, TaskStatus},
     tree::BehaviourTree,
 };
 
@@ -75,6 +75,10 @@ pub struct BehaviourRunnerCycles {
     /// composite nodes, so it wouldn't take several frames to continue
     /// updating the tree.
     pub(crate) rerun: bool,
+    /// Tasks spawned during the current cycle's command flush. After the
+    /// cycle, another one runs only if at least one of them is still alive
+    /// and awake; tasks that auto-resolved in the same flush don't need it.
+    pub(crate) pending_spawns: Vec<Entity>,
 }
 
 impl BehaviourRunnerCycles {
@@ -98,6 +102,15 @@ fn run_behaviour_tasks_system(world: &mut World) {
         drop(cycles);
 
         world.run_schedule(BehaviourUpdateCycleSchedule);
+
+        world.resource_scope(|world, mut cycles: Mut<BehaviourRunnerCycles>| {
+            let rerun = cycles.pending_spawns.drain(..).any(|task| {
+                world.get::<TaskStatus>(task).is_some_and(|status| !status.is_finished())
+                    && world.get::<SleepingTask>(task).is_some_and(|s| !s.is_sleeping())
+                    && world.get::<DisabledTask>(task).is_none()
+            });
+            cycles.rerun = rerun;
+        });
     }
 
     world.run_schedule(BehaviourEndRunSchedule);

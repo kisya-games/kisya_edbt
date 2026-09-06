@@ -11,7 +11,6 @@ use bevy::{
 use thiserror::Error;
 
 use crate::core::{
-    DisabledBehaviour,
     node::{BehaviourNode, TreeNodeId},
     runner::BehaviourRunnerCycles,
     task::{ChildTaskSpawned, SleepingTask, TaskChildOf, TaskInfo, TaskOf, TaskStatus, TaskWorker},
@@ -148,6 +147,7 @@ impl EntityCommand for SpawnTask {
         let registry = world.resource::<AppTypeRegistry>().clone();
         let registry = registry.0.read();
 
+        let mut spawned = smallvec::SmallVec::<[Entity; 2]>::new();
         for (task_entity, tree_node_id) in self.payload {
             // A source can finish and despawn partway through spawning its batch of
             // children; don't spawn a child against a dead source.
@@ -159,13 +159,13 @@ impl EntityCommand for SpawnTask {
                 registry.get_type_data::<DynamicNodeSpawner>(tree_node_id.node.type_id)
             {
                 (methods.spawn)(world, actor, task_entity, self.parent, tree_node_id)?;
+                spawned.push(task_entity);
             }
         }
 
-        if world.get::<DisabledBehaviour>(actor).is_none() {
-            // TODO: this is probably should work on observers in runner.rs ?
-            world.resource_mut::<BehaviourRunnerCycles>().rerun = true;
-        }
+        // The runner decides after the cycle whether these spawns are still
+        // alive and awake and thus warrant another cycle.
+        world.resource_mut::<BehaviourRunnerCycles>().pending_spawns.extend(spawned);
 
         Ok(())
     }

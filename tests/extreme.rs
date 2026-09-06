@@ -55,7 +55,10 @@ fn suspiciously_normal_looking_tree() {
         Some(&LifecycleEvent::Finished("SequenceNode".into(), TaskStatus::Success)),
         "the root sequence resolves last and succeeds"
     );
-    assert_eq!(cycles, 2, "The whole tree resolves in 2 cycles becaouse of the LoopUntilNode");
+    assert_eq!(
+        cycles, 1,
+        "every instant task auto-resolves within the first cycle's command flush, so no extra cycle runs"
+    );
 }
 
 #[test]

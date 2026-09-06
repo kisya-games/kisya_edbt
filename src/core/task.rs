@@ -23,6 +23,7 @@ impl Plugin for TaskPlugin {
         app.world_mut().register_disabling_component::<DisabledTask>();
 
         app.add_systems(BehaviourNewRunSchedule, new_run_system);
+        app.add_observer(on_task_status_inserted_hook);
     }
 }
 
@@ -44,9 +45,10 @@ where
     fn build(&self, app: &mut App) {
         app.add_systems(
             BehaviourUpdateCycleSchedule,
-            task_workers_system::<N>.in_set(BehaviourUpdateCycleSystems::PostUpdate),
+            task_workers_system::<N>
+                .run_if(any_with_component::<TaskWorker<N>>)
+                .in_set(BehaviourUpdateCycleSystems::PostUpdate),
         );
-        app.add_observer(on_task_status_inserted_hook::<N>);
         app.register_type::<TaskWorker<N>>()
             .register_type_data::<N, DynamicNodeSpawner>()
             .register_type_data::<N, ReflectDynamicNode>();
@@ -245,13 +247,10 @@ fn task_workers_system<N: BehaviourNode>(
     }
 }
 
-fn on_task_status_inserted_hook<N: BehaviourNode>(
+fn on_task_status_inserted_hook(
     event: On<Insert, TaskStatus>,
     mut cmd: Commands,
-    q_task: Query<
-        (&TaskStatus, &TaskInfo, Option<&TaskChildOf>, Option<&TaskChildren>),
-        With<TaskWorker<N>>,
-    >,
+    q_task: Query<(&TaskStatus, &TaskInfo, Option<&TaskChildOf>, Option<&TaskChildren>)>,
     q_child_task: Query<(Entity, &TaskStatus)>,
 ) -> Result<()> {
     let Ok((status, info, child_of, children)) = q_task.get(event.entity) else {

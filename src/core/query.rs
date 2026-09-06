@@ -12,7 +12,7 @@
 //! (`&TaskWorker<N>`, `&TaskOf`, and so on), but if you do, keep two things in
 //! mind:
 //! - Tasks can be **sleeping** ([`SleepingTask`]): a raw query will match them
-//!   too, so add a `Without<SleepingTask>` filter;
+//!   too, so skip the ones whose `SleepingTask` is `SleepingTask::Sleep`;
 //! - Tasks can be **disabled**
 //!   ([`DisabledTask`](crate::core::task::DisabledTask)): like bevy's
 //!   `Disabled`, a disabled task is skipped by every query that doesn't
@@ -232,8 +232,9 @@ unsafe impl<'a, N: BehaviourNode> ReadOnlyQueryData for NodeRef<'a, N> {}
 // SAFETY: same as above - read-only access is always safe to alias.
 unsafe impl<'a, N: BehaviourNode> IterQueryData for NodeRef<'a, N> {}
 
-type TaskRefTuple<'w, N> = (Entity, &'w TaskWorker<N>, &'w TaskOf, &'w TaskInfo);
-type TaskMutTuple<'w, N> = (Entity, &'w mut TaskWorker<N>, &'w TaskOf, &'w TaskInfo);
+type TaskRefTuple<'w, N> = (Entity, &'w TaskWorker<N>, &'w TaskOf, &'w TaskInfo, &'w SleepingTask);
+type TaskMutTuple<'w, N> =
+    (Entity, &'w mut TaskWorker<N>, &'w TaskOf, &'w TaskInfo, &'w SleepingTask);
 
 /// Read-only composite view of a task: its own entity, [`TaskWorker`] (deref to
 /// the task itself), [`TaskOf`] (the actor it's running for) and [`TaskInfo`]
@@ -305,7 +306,6 @@ impl<N: BehaviourNode> std::ops::DerefMut for TaskMut<'_, N> {
 /// [`WorldQuery::State`] shared by [`TaskRef`] and [`TaskMut`].
 pub struct TaskViewState<N: BehaviourNode> {
     tuple: <TaskRefTuple<'static, N> as WorldQuery>::State,
-    sleeping: ComponentId,
 }
 
 impl<N: BehaviourNode> Clone for TaskViewState<N> {
@@ -360,7 +360,6 @@ unsafe impl<'a, N: BehaviourNode> WorldQuery for TaskRef<'a, N> {
 
     fn update_component_access(state: &Self::State, access: &mut FilteredAccess) {
         <TaskRefTuple<N> as WorldQuery>::update_component_access(&state.tuple, access);
-        access.and_without(state.sleeping);
     }
 
     fn init_nested_access(
@@ -378,17 +377,11 @@ unsafe impl<'a, N: BehaviourNode> WorldQuery for TaskRef<'a, N> {
     }
 
     fn init_state(world: &mut World) -> Self::State {
-        TaskViewState {
-            tuple: <TaskRefTuple<N> as WorldQuery>::init_state(world),
-            sleeping: world.register_component::<SleepingTask>(),
-        }
+        TaskViewState { tuple: <TaskRefTuple<N> as WorldQuery>::init_state(world) }
     }
 
     fn get_state(components: &Components) -> Option<Self::State> {
-        Some(TaskViewState {
-            tuple: <TaskRefTuple<N> as WorldQuery>::get_state(components)?,
-            sleeping: components.component_id::<SleepingTask>()?,
-        })
+        Some(TaskViewState { tuple: <TaskRefTuple<N> as WorldQuery>::get_state(components)? })
     }
 
     fn matches_component_set(
@@ -396,7 +389,6 @@ unsafe impl<'a, N: BehaviourNode> WorldQuery for TaskRef<'a, N> {
         set_contains_id: &impl Fn(ComponentId) -> bool,
     ) -> bool {
         <TaskRefTuple<N> as WorldQuery>::matches_component_set(&state.tuple, set_contains_id)
-            && !set_contains_id(state.sleeping)
     }
 }
 
@@ -405,7 +397,7 @@ unsafe impl<'a, N: BehaviourNode> QueryData for TaskRef<'a, N> {
     type Item<'w, 's> = TaskRef<'w, N>;
     type ReadOnly = Self;
 
-    const IS_ARCHETYPAL: bool = <TaskRefTuple<'static, N> as QueryData>::IS_ARCHETYPAL;
+    const IS_ARCHETYPAL: bool = false;
     const IS_READ_ONLY: bool = true;
 
     fn shrink<'wlong: 'wshort, 'wshort, 's>(
@@ -421,9 +413,12 @@ unsafe impl<'a, N: BehaviourNode> QueryData for TaskRef<'a, N> {
         table_row: TableRow,
     ) -> Option<Self::Item<'w, 's>> {
         // SAFETY: forwarded from the caller of `QueryData::fetch`.
-        let (entity, worker, task_of, info) = unsafe {
+        let (entity, worker, task_of, info, sleeping) = unsafe {
             <TaskRefTuple<N> as QueryData>::fetch(&state.tuple, fetch, entity, table_row)
         }?;
+        if sleeping.is_sleeping() {
+            return None;
+        }
         Some(TaskRef { entity, worker, task_of, info })
     }
 
@@ -484,7 +479,6 @@ unsafe impl<'a, N: BehaviourNode> WorldQuery for TaskMut<'a, N> {
 
     fn update_component_access(state: &Self::State, access: &mut FilteredAccess) {
         <TaskMutTuple<N> as WorldQuery>::update_component_access(&state.tuple, access);
-        access.and_without(state.sleeping);
     }
 
     fn init_nested_access(
@@ -502,17 +496,11 @@ unsafe impl<'a, N: BehaviourNode> WorldQuery for TaskMut<'a, N> {
     }
 
     fn init_state(world: &mut World) -> Self::State {
-        TaskViewState {
-            tuple: <TaskMutTuple<N> as WorldQuery>::init_state(world),
-            sleeping: world.register_component::<SleepingTask>(),
-        }
+        TaskViewState { tuple: <TaskMutTuple<N> as WorldQuery>::init_state(world) }
     }
 
     fn get_state(components: &Components) -> Option<Self::State> {
-        Some(TaskViewState {
-            tuple: <TaskMutTuple<N> as WorldQuery>::get_state(components)?,
-            sleeping: components.component_id::<SleepingTask>()?,
-        })
+        Some(TaskViewState { tuple: <TaskMutTuple<N> as WorldQuery>::get_state(components)? })
     }
 
     fn matches_component_set(
@@ -520,7 +508,6 @@ unsafe impl<'a, N: BehaviourNode> WorldQuery for TaskMut<'a, N> {
         set_contains_id: &impl Fn(ComponentId) -> bool,
     ) -> bool {
         <TaskMutTuple<N> as WorldQuery>::matches_component_set(&state.tuple, set_contains_id)
-            && !set_contains_id(state.sleeping)
     }
 }
 
@@ -530,7 +517,7 @@ unsafe impl<'a, N: BehaviourNode> QueryData for TaskMut<'a, N> {
     type Item<'w, 's> = TaskMut<'w, N>;
     type ReadOnly = TaskRef<'a, N>;
 
-    const IS_ARCHETYPAL: bool = <TaskMutTuple<'static, N> as QueryData>::IS_ARCHETYPAL;
+    const IS_ARCHETYPAL: bool = false;
     const IS_READ_ONLY: bool = false;
 
     fn shrink<'wlong: 'wshort, 'wshort, 's>(
@@ -546,9 +533,12 @@ unsafe impl<'a, N: BehaviourNode> QueryData for TaskMut<'a, N> {
         table_row: TableRow,
     ) -> Option<Self::Item<'w, 's>> {
         // SAFETY: forwarded from the caller of `QueryData::fetch`.
-        let (entity, worker, task_of, info) = unsafe {
+        let (entity, worker, task_of, info, sleeping) = unsafe {
             <TaskMutTuple<N> as QueryData>::fetch(&state.tuple, fetch, entity, table_row)
         }?;
+        if sleeping.is_sleeping() {
+            return None;
+        }
         Some(TaskMut { entity, worker, task_of, info })
     }
 

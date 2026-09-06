@@ -3,7 +3,7 @@
 use std::marker::PhantomData;
 
 use bevy::{
-    ecs::{component::ComponentId, event::EntityComponentsTrigger, query::Has},
+    ecs::{component::ComponentId, event::EntityComponentsTrigger},
     prelude::*,
     reflect::GetTypeRegistration,
 };
@@ -94,7 +94,7 @@ impl TaskInfo {
 
 /// Component-wrapper of a singular unit of work for a [`BehaviourNode`].
 #[derive(Component, Debug, Reflect)]
-#[require(TaskStatus)]
+#[require(TaskStatus, SleepingTask)]
 pub struct TaskWorker<N: BehaviourNode> {
     /// Task that will be used in behaviour systems.
     pub task: N::Task,
@@ -153,10 +153,21 @@ impl TaskChildOf {
 #[reflect(Component, FromWorld, Default)]
 pub struct TaskChildren(Vec<Entity>);
 
-/// Marker for a task that skips update systems until the next behaviour run.
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[component(immutable)]
-pub struct SleepingTask;
+/// Wakefulness of a task: a sleeping task skips update systems until the next
+/// behaviour run. This might happen in case of multiple cycles per one run.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum SleepingTask {
+    /// Task takes part in update systems of the current cycle.
+    #[default]
+    Awake,
+    /// Task skips update systems until the next behaviour run.
+    Sleep,
+}
+
+impl SleepingTask {
+    /// Checks if the task is currently asleep.
+    pub fn is_sleeping(&self) -> bool { matches!(self, SleepingTask::Sleep) }
+}
 
 /// Special marker to disable any logic of a task.
 ///
@@ -225,12 +236,11 @@ pub struct ChildTaskSpawned {
 /// next real frame. Teardown of finished tasks is handled inline by
 /// `on_task_status_inserted_hook` instead of polled here.
 fn task_workers_system<N: BehaviourNode>(
-    mut cmd: Commands,
-    q_task: Query<(Entity, &TaskStatus, Has<SleepingTask>), With<TaskWorker<N>>>,
+    mut q_task: Query<(&TaskStatus, &mut SleepingTask), With<TaskWorker<N>>>,
 ) {
-    for (entity, status, is_sleeping) in &q_task {
-        if !status.is_finished() && !is_sleeping {
-            cmd.entity(entity).try_insert(SleepingTask);
+    for (status, mut sleeping) in &mut q_task {
+        if !status.is_finished() {
+            sleeping.set_if_neq(SleepingTask::Sleep);
         }
     }
 }
@@ -255,7 +265,7 @@ fn on_task_status_inserted_hook<N: BehaviourNode>(
     let info = *info;
     let status = *status;
 
-    cmd.entity(task).remove::<SleepingTask>();
+    cmd.entity(task).try_insert(SleepingTask::Awake);
     cmd.queue(move |world: &mut World| {
         world.trigger_with(
             TaskFinished { task, source: info.source, status },
@@ -283,9 +293,10 @@ fn on_task_status_inserted_hook<N: BehaviourNode>(
             if !world.get::<TaskStatus>(parent).is_some_and(|s| !s.is_finished()) {
                 return;
             }
-            let was_sleeping = world.get::<SleepingTask>(parent).is_some();
-            if was_sleeping {
-                world.entity_mut(parent).remove::<SleepingTask>();
+            let was_sleeping =
+                world.get::<SleepingTask>(parent).is_some_and(SleepingTask::is_sleeping);
+            if was_sleeping && let Some(mut sleeping) = world.get_mut::<SleepingTask>(parent) {
+                *sleeping = SleepingTask::Awake;
             }
             world.trigger_with(
                 ChildTaskFinished {
@@ -300,8 +311,8 @@ fn on_task_status_inserted_hook<N: BehaviourNode>(
                     new_archetype: None,
                 },
             );
-            if was_sleeping && world.get_entity(parent).is_ok() {
-                world.entity_mut(parent).insert(SleepingTask);
+            if was_sleeping && let Some(mut sleeping) = world.get_mut::<SleepingTask>(parent) {
+                *sleeping = SleepingTask::Sleep;
             }
         });
     }
@@ -310,15 +321,12 @@ fn on_task_status_inserted_hook<N: BehaviourNode>(
     Ok(())
 }
 
-fn new_run_system(
-    mut commands: Commands,
-    q_sleeping: Query<(Entity, &TaskStatus), With<SleepingTask>>,
-) {
+fn new_run_system(mut q_sleeping: Query<(&TaskStatus, &mut SleepingTask)>) {
     // Finished tasks stay asleep so they go straight to teardown without one more
     // update.
-    for (entity, status) in &q_sleeping {
+    for (status, mut sleeping) in &mut q_sleeping {
         if !status.is_finished() {
-            commands.entity(entity).remove::<SleepingTask>();
+            sleeping.set_if_neq(SleepingTask::Awake);
         }
     }
 }

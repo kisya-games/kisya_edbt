@@ -120,16 +120,16 @@ It's probably not a very valid benchmark, because I have no idea what I'm doing.
 
 | scenario | actors | total | per actor |
 |---|---:|---:|---:|
-| _instant_ | 10 | 0.173 ms | 17.291 µs |
-| _instant_ | 100 | 0.586 ms | 5.862 µs |
-| _instant_ | 1000 | 4.482 ms | 4.482 µs |
-| _instant_ | 10000 | 40.053 ms | 4.005 µs |
-| _instant_ | 100000 | 463.368 ms | 4.634 µs |
-| _multiframe_ | 10 | 0.108 ms | 10.822 µs |
-| _multiframe_ | 100 | 0.200 ms | 1.998 µs |
-| _multiframe_ | 1000 | 0.957 ms | 0.957 µs |
-| _multiframe_ | 10000 | 8.762 ms | 0.876 µs |
-| _multiframe_ | 100000 | 179.851 ms | 1.799 µs |
+| _instant_ | 10 | 0.156 ms | 15.567 µs |
+| _instant_ | 100 | 0.467 ms | 4.675 µs |
+| _instant_ | 1000 | 3.332 ms | 3.332 µs |
+| _instant_ | 10000 | 31.445 ms | 3.144 µs |
+| _instant_ | 100000 | 357.719 ms | 3.577 µs |
+| _multiframe_ | 10 | 0.091 ms | 9.114 µs |
+| _multiframe_ | 100 | 0.097 ms | 0.968 µs |
+| _multiframe_ | 1000 | 0.133 ms | 0.133 µs |
+| _multiframe_ | 10000 | 0.500 ms | 0.050 µs |
+| _multiframe_ | 100000 | 13.598 ms | 0.136 µs |
 
 There are two scenarios: instant for one-shot nodes, and multiframe for nodes updating for a while.
 Measured on *12th Gen Intel(R) Core(TM) i7-12800H*.

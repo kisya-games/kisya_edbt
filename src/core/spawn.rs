@@ -223,10 +223,10 @@ fn spawn_task<N: BehaviourNode>(
             .map(|info| info.worker_id)
             .ok_or_else(|| TaskSpawnError::InvalidParentTask(parent))?;
 
-        // Remove sleeping so observers can use `TaskRef`/`TaskMut`
-        let was_sleeping = parent_mut.contains::<SleepingTask>();
-        if was_sleeping {
-            parent_mut.remove::<SleepingTask>();
+        // Wake the parent up so observers can use `TaskRef`/`TaskMut`
+        let was_sleeping = parent_mut.get::<SleepingTask>().is_some_and(SleepingTask::is_sleeping);
+        if was_sleeping && let Some(mut sleeping) = parent_mut.get_mut::<SleepingTask>() {
+            *sleeping = SleepingTask::Awake;
         }
         parent_mut.world_scope(|world| {
             world.trigger_with(
@@ -238,8 +238,11 @@ fn spawn_task<N: BehaviourNode>(
                 },
             );
         });
-        if was_sleeping && parent_mut.is_spawned() {
-            parent_mut.insert(SleepingTask);
+        if was_sleeping
+            && parent_mut.is_spawned()
+            && let Some(mut sleeping) = parent_mut.get_mut::<SleepingTask>()
+        {
+            *sleeping = SleepingTask::Sleep;
         }
     }
 

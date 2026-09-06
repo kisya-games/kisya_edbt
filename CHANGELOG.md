@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `SleepingTask` is not an enum, which allows `TaskRef`/`TaskMut` `IS_ARCHETYPAL` to be `false`.
+  This means that puttiing tasks to sleep and awaking them isn't an archetype change.
+  The results are a massive 40-90% speedup of multiframe tasks.
+
 ## [0.1.0] - 2026-09-02
 
 ### Added

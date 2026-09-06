@@ -111,7 +111,7 @@
 //! You are free to query whatever you want directly, but remember a task can
 //! be *sleeping* (in multi-cycle environment, which can be used by
 //! [`runner`](crate::core::runner) to run fresh batches of tasks within a
-//! single update) -- filter it out with `Without<SleepingTask>`, or use
+//! single update) -- check its `SleepingTask` component, or use
 //! [`TaskMut`](crate::core::query::TaskMut)/
 //! [`TaskRef`](crate::core::query::TaskRef)). Also be aware of *disabled*
 //! tasks: [`DisabledTask`](crate::core::task::DisabledTask) marker, skipped

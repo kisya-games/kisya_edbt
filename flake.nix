@@ -50,6 +50,7 @@
             pkg-config
             taplo
             rust-analyzer-unwrapped
+            jq
           ];
 
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath runtimeLibs;

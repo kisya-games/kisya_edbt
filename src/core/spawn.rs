@@ -114,12 +114,20 @@ impl SpawnTaskExt for EntityCommands<'_> {
         let pre_spawned = input.pre_spawn(&mut cmd);
         let payload = input.into_payload(&pre_spawned);
         cmd.queue(move |world: &mut World| -> Result<()> {
+            let parent_alive =
+                world.get::<TaskStatus>(parent).is_some_and(|status| !status.is_finished());
+            if !parent_alive {
+                for (task_entity, _) in payload {
+                    world.despawn(task_entity);
+                }
+                return Ok(());
+            }
             let actor = world
                 .get::<TaskOf>(parent)
                 .map(TaskOf::actor)
-                .ok_or_else(|| TaskSpawnError::NotAnActorTask(parent))?;
+                .ok_or(TaskSpawnError::NotAnActorTask(parent))?;
             if !world.entities().contains_spawned(actor) {
-                return Ok(());
+                return Err(TaskSpawnError::EntityNotFound(actor).into());
             }
             let spawn = SpawnTask { parent: Some(parent), payload };
             spawn.apply(world.entity_mut(actor))
